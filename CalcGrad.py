@@ -8,17 +8,17 @@ import math
 
 class Value:
     def __init__(self, data, children=(), op=''):
-        self.data = data # int 
+        self.data: float = data # int 
         self.children = children
-        self.op = op
-        self.grad = 0.0
-        self._backward = lambda: None
-        self.ValueId = id(self)
+        self.op: str = op
+        self.grad: float = 0.0
+        self._backward: function = lambda: None
+        self.ValueId: int = id(self)
 
     def __repr__(self):
-        return f"Value(data: {self.data})"
+        return f"Value(data: {self.data:.2f})"
 
-    def __add__(self, othaer):
+    def __add__(self, other):
         other = other if isinstance(other, Value) else Value(other)
         out = Value(self.data + other.data, (self, other), '+')
 
@@ -29,14 +29,14 @@ class Value:
 
         return out
     
-    def __radd__(self, other):
+    def __radd__(self, other: float|int):
         return self + other
 
 
     def __neg__(self):
         return self * -1
 
-    def __sub__(self, other):
+    def __sub__(self, other: float|int):
         return self + (-other)
 
     def __rsub__(self, other):
@@ -94,7 +94,7 @@ class Value:
     def backward(self):
         self.grad = 1.0  # Start gradient from output node
         topo = []
-        visited = set()
+        visited: set = set()
 
         def build_topo(node: Value):
             if node not in visited:
@@ -107,8 +107,26 @@ class Value:
         for node in reversed(topo):
             node._backward()
 
+
+    def ZeroGrad(self):
+        topo: list[Value] = []
+        visited: set = set()
+
+        def build_topo(node: Value):
+            if node not in visited:
+                visited.add(node)
+                for child in node.children:
+                    build_topo(child)
+                topo.append(node)
+
+        build_topo(self)
+        for node in reversed(topo):
+            node.grad = 0.0
+
+
+
 class Neuron:
-    def __init__(self, wNumber):
+    def __init__(self, wNumber: int):                              # Will create a neuron with random weights
         self.w = [Value(random.uniform(-1, 1)) for i in range(wNumber)]
         self.b = Value(random.uniform(-1, 1))
 
@@ -118,21 +136,21 @@ class Neuron:
         return act.tanh()
 
 
-class Layer:
-    def __init__(self, nin, nout):
-        self.neurons = [Neuron(nin) for _ in range(nout)]
-
-    def __call__(self, x):
-        outs = [n(x) for n in self.neurons]
+class Layer:                                                                # Layer of neurons   |
+    def __init__(self, nin, nout):                                          #     in    2   out  |> MLP of 2, 2 
+        self.neurons: list[Neuron] = [Neuron(nin) for _ in range(nout)]     #  *---#   -#---*    |> It's has tow layers of 2 neurons
+#                                                                           #       \ /          |> each neuron has 2 weights and 1 bias
+    def __call__(self, x):                                                  #       / \          |> Great & easy, right?
+        outs: list[Value] = [n(x) for n in self.neurons]                    #  *---#   -#---*    |
         return outs
 
 
 class MLP:
-    def __init__(self, nin, nout):
-        size = [nin] + nout
-        self.layers = [Layer(size[i], size[i+1]) for i in range(len(nout))]
+    def __init__(self, layers: list[int]) -> list[Value]:                      # [2, 4, 3] -->  2 input, 4 hidden, 3 output
+        self.layers: list[Layer] = [Layer(layers[i], layers[i+1]) for i in range(len(layers)-1)]
 
-    def __call__(self, x):
-        for layer in self.layers:
-            x = layer(x)
+    def __call__(self, x):                                      # Forward pass on the call | Getting prediction
+        for layer in self.layers:                               # Subistute x in each layer.
+            x: list[Value] = layer(x)
         return x
+    
