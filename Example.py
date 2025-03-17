@@ -19,10 +19,12 @@ if not is_same_dim(y_pred, Y):
     raise ValueError("Dimension mismatch")
 
 
-# Calculate the loss
+# Calculate the loss                  # (RS)2 / [(RS)2 + (RA)2]
 def calc_loss(y_pred: list, y: list) -> float:
-    loss = 0
+    loss = 0.0
     for y_pred_, y_ in zip(y_pred, y):
         loss += (y_pred_ - y_) ** 2
     return loss
 
+
+print(calc_loss(y_pred, Y))
