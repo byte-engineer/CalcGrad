@@ -153,6 +153,8 @@ class Layer:                                                                    
         return f"Layer(neurons={len(self.neurons)})"  # Assuming Layer has a list of neurons
 
 
+from graphviz import Digraph
+
 class Network:
     def __init__(self, layers: list[int]) -> list[Value]:       # [2, 4, 3] -->  2 input, 4 hidden, 3 output
         self.layers: list[Layer] = [Layer(layers[i], layers[i+1]) for i in range(len(layers)-1)]
@@ -161,6 +163,9 @@ class Network:
         """
         Input list length must must match the the input layer of the neural network
         """
+        if (len(inputs) != len(self.layers[0].neurons)):
+            RuntimeError("Input list length must must match the the input layer of the neural network")
+
         x = inputs
         for layer in self.layers:                               # Subistute x in each layer sequencially.
             x: list[Value] = layer(x)
@@ -169,3 +174,24 @@ class Network:
     def __repr__(self):
         layers_str = "\n  ".join(f"Layer {i}: {str(layer)}" for i, layer in enumerate(self.layers))
         return f"Network(\n  {layers_str}\n)"
+
+    def visualize(self, filename="network"):
+        dot = Digraph(format="svg")
+        dot.attr(rankdir="LR")  # Left to Right layout
+
+        # Add nodes for each layer
+        for layer_idx, layer in enumerate(self.layers):
+            with dot.subgraph() as sub:
+                sub.attr(rank="same")  # Keep neurons in the same layer at the same level
+                for neuron_idx, neuron in enumerate(layer.neurons):
+                    node_name = f"L{layer_idx}_N{neuron_idx}"
+                    sub.node(node_name, label="⚪")
+
+        # Add edges (connections)
+        for layer_idx in range(len(self.layers) - 1):
+            for neuron_idx, neuron in enumerate(self.layers[layer_idx].neurons):
+                for next_neuron_idx in range(len(self.layers[layer_idx + 1].neurons)):
+                    dot.edge(f"L{layer_idx}_N{neuron_idx}", f"L{layer_idx+1}_N{next_neuron_idx}")
+
+        # Render the graph
+        dot.render(filename, view=False)
