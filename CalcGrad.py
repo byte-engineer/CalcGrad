@@ -1,6 +1,4 @@
 import math
-import numpy as np
-import matplotlib.pyplot as plt
 import random
 from typing import Union
 
@@ -180,6 +178,12 @@ class Layer:                                                                    
 
 class Network:
     def __init__(self, layers: list[int], initlization: float|None=None) -> list[Value]:       # [2, 4, 3] -->  2 input, 4 hidden, 3 output
+        """
+        Create a layer of Neurons `Neuron()`
+        ### parameters
+        `layers`: length of layers .e.g `[1, 3, 4, 1]` network of one input layer, tow hidden layers and one output layer.\n
+        `initlization`: Will initlize all the neurons with some float value if not None.
+        """
         self.layers: list[Layer] = [Layer(layers[i], layers[i+1], initlization) for i in range(len(layers)-1)]
 
     def __call__(self, inputs: list[float|Value]) -> list[Value]:
