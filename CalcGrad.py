@@ -127,37 +127,60 @@ class Value:
 
 
 class Neuron:
-    def __init__(self, weights_count: int):                            # Will create a neuron with random weights
-        self.weights: list[Value]  = [Value(random.uniform(-1, 1)) for _ in range(weights_count)]
-        self.bias: Value           = Value(random.uniform(-1, 1))
+    def __init__(self, weights_count: int, initlization: None|float =None):
+        """
+        Create a single Neuron
+        ### parameters
+        `weights_count`: number of weights.\n
+        `initlization`: Will initlize all the weights and bias with some float value if not None.
+        """
+        self.weights: list[Value]  = [Value(random.uniform(-1, 1)) if initlization is None else initlization  for _ in range(weights_count)]
+        self.bias: Value           = Value(random.uniform(-1, 1))  if initlization is None else initlization
 
     def __call__(self, x: list[float|Value]) -> Value:                          # Forward pass on the call operator.
-        WxX: list[Value] = [wi*xi for wi, xi in zip(self.weights, x)]        # All wieghts * inputs
-        act = sum(WxX, self.bias)                                         
-        return act.tanh()                                              # Normlize the Sum using tanh() | -1 <-> 1
+        WxX: list[Value] = [wi*xi for wi, xi in zip(self.weights, x)]           # All wieghts * inputs
+        act = sum(WxX, self.bias)
+        return act.tanh()                                                       # Normlize the Sum using tanh() | -1 <-> 1
 
     def __repr__(self):
         weights_str = ", ".join(f"{w.data:6.3f}" for w in self.weights)
         return f"Neuron(weights=[{weights_str}], bias={self.bias.data:6.3f})"
+    
+    def parameters(self) -> list[Value]:
+        self.weights.append(self.bias)
+        return self.weights
 
 
-class Layer:                                                                              # Layer of neurons   |
-    def __init__(self, input_count: int, output_count: int ):                             #     in    2   out  |> MLP of 2, 2 
-        self.neurons: list[Neuron] = [Neuron(input_count) for _ in range(output_count)]   #  *---#   -#---*    |> It's has tow layers of 2 neurons
-#                                                                                         #       \ /          |> each neuron has 2 weights and 1 bias
-    def __call__(self, x: list[float|Value]) -> list[Value]:                              #       / \          |> Great & easy, right?
-        outs: list[Value] = [n(x) for n in self.neurons]                                  #  *---#   -#---*    |
+
+class Layer:                                                                                # Layer of neurons
+    def __init__(self, input_count: int, output_count: int, initlization: float|None=None): #|> MLP of 2, 2 
+        """
+        Create a layer of Neurons `Neuron()`
+        ### parameters
+        `input_count`: number of layer inputs.\n
+        `outputs_count`: number of layer outputs.\n
+        `initlization`: Will initlize all the neurons with some float value if not None.
+        """
+        self.neurons: list[Neuron] = [Neuron(input_count, initlization) for _ in range(output_count)]     #|> It's has tow layers of 2 neurons
+#                                                                                                         #|> each neuron has 2 weights and 1 bias
+    def __call__(self, x: list[float|Value]) -> list[Value]:                                              #|> Great & easy, right?
+        outs: list[Value] = [n(x) for n in self.neurons]                                                  #
         return outs
 
     def __repr__(self):
-        return f"Layer(neurons={len(self.neurons)})"  # Assuming Layer has a list of neurons
+        return f"Layer(neurons={len(self.neurons)})"                                                      # Assuming Layer has a list of neurons
+
+    def parameters(self) -> list[Value]:
+        para: list[Value] = []
+        for neuron in self.neurons:
+            para.extend(neuron.parameters())
+        return para
 
 
-from graphviz import Digraph
 
 class Network:
-    def __init__(self, layers: list[int]) -> list[Value]:       # [2, 4, 3] -->  2 input, 4 hidden, 3 output
-        self.layers: list[Layer] = [Layer(layers[i], layers[i+1]) for i in range(len(layers)-1)]
+    def __init__(self, layers: list[int], initlization: float|None=None) -> list[Value]:       # [2, 4, 3] -->  2 input, 4 hidden, 3 output
+        self.layers: list[Layer] = [Layer(layers[i], layers[i+1], initlization) for i in range(len(layers)-1)]
 
     def __call__(self, inputs: list[float|Value]) -> list[Value]:
         """
@@ -175,23 +198,8 @@ class Network:
         layers_str = "\n  ".join(f"Layer {i}: {str(layer)}" for i, layer in enumerate(self.layers))
         return f"Network(\n  {layers_str}\n)"
 
-    def visualize(self, filename="network"):
-        dot = Digraph(format="svg")
-        dot.attr(rankdir="LR")  # Left to Right layout
-
-        # Add nodes for each layer
-        for layer_idx, layer in enumerate(self.layers):
-            with dot.subgraph() as sub:
-                sub.attr(rank="same")  # Keep neurons in the same layer at the same level
-                for neuron_idx, neuron in enumerate(layer.neurons):
-                    node_name = f"L{layer_idx}_N{neuron_idx}"
-                    sub.node(node_name, label="⚪")
-
-        # Add edges (connections)
-        for layer_idx in range(len(self.layers) - 1):
-            for neuron_idx, neuron in enumerate(self.layers[layer_idx].neurons):
-                for next_neuron_idx in range(len(self.layers[layer_idx + 1].neurons)):
-                    dot.edge(f"L{layer_idx}_N{neuron_idx}", f"L{layer_idx+1}_N{next_neuron_idx}")
-
-        # Render the graph
-        dot.render(filename, view=False)
+    def parameters(self):
+        para: list[Value] = []
+        for layer in self.layers:
+            para.extend(layer.parameters())
+        return para
