@@ -4,12 +4,12 @@ from utils import is_same_dim
 
 # Create A neural network.
 
-neural_network = MLP([2, 2, 1])         # 2 input, 2 hidden, 1 output
+neural_network = MLP([2, 2, 1])       # 2 input, 2 hidden, 1 output
 
-# Create a dataset                    # XOR gate
+# Create a dataset                    # XOR
 X = [[0, 0], [0, 1], [1, 0], [1, 1]]  # pairs of inputs sence we have 2 input nodes
 Y = [[0], [1], [1], [0]]              # single groups sense we have 1 output node
-
+Y = map(lambda x: list(x[0] ^ x[1]), X)
 
 y_pred: list[Value] = []
 for x in X:
