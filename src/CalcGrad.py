@@ -125,9 +125,9 @@ class Value:
         def build_topo(node: Value):
             if node not in visited:
                 visited.add(node)
-                for child in node.children:
+                for child in node.children:   # This tow lines will be ignored if there is no childs. 
                     build_topo(child)
-                topo.append(node)
+                topo.append(node)             # This Line will executed if there is not childs.
 
         build_topo(self)
         for node in reversed(topo):
