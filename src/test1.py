@@ -42,15 +42,3 @@ print("b.grad: " + str(float(b.grad)))
 print("c.grad: " + str(float(c.grad)))
 print("d.grad: " + str(float(d.grad)))
 
-
-# Using network class.
-xs = [2.0, 3.0, -1.0]            # inputs
-
-N = Network([4, 3, 3, 1])        # this represents the layers
-
-preds: list[Value] = N(xs)       # calling the Network object with the inputs
-
-for pred in preds:
-    pred.backward()
-
-view_dot(draw_graph(preds[0]))

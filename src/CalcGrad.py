@@ -197,6 +197,7 @@ class Network:
         """
         self.layers: list[Layer] = [Layer(layers[i], layers[i+1], initlization) for i in range(len(layers)-1)]
 
+
     def __call__(self, inputs: list[float|Value]) -> list[Value]:
         """
         Input list length must must match the the input layer of the neural network
@@ -209,10 +210,10 @@ class Network:
             x: list[Value] = layer(x)
         return x
     
+
     def __repr__(self):
         layers_str = "\n  ".join(f"Layer {i}: {str(layer)}" for i, layer in enumerate(self.layers))
         return f"Network(\n  {layers_str}\n)"
-
 
 
     def parameters(self):                     
@@ -228,6 +229,18 @@ class Network:
                 unique_para.append(p)
     
         return unique_para
+
+
+    def calc_loss(self, y_train: list[Value], preductions: list[Value]) -> Value:
+
+        if len(y_train) != len(preductions):
+            raise ValueError("length of y_train and preductions is NOT equal")
+        
+        return sum([y_train + pred for tr, pred in zip(y_train, preductions)])
+        
+
+
+
 
 
 if __name__ == '__main__':
