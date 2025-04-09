@@ -17,7 +17,7 @@ A tiny neural network framework built from scratch using only Python — no exte
 
 ### 1. Define a Network
 ```python
-from mynet import Network, Value
+from CalcGrad import Network, Value
 
 net = Network([2, 4, 1])  # 2 inputs → 4 hidden → 1 output
 ```
@@ -60,7 +60,7 @@ for x, _ in data:
     print(f"{x} → {[o.data for o in out]}")
 ```
 
-### `License
+### License
 MIT — Use it, learn from it, hack it! 🔧
 
 

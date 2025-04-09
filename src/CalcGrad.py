@@ -229,7 +229,7 @@ class Network:
         return f"Network(\n  {layers_str}\n)"
 
 
-    def parameters(self):                     
+    def parameters(self) -> list[Value]:                     
         para: list[Value] = []
         for layer in self.layers:
             para.extend(layer.parameters())
