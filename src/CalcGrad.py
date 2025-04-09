@@ -1,12 +1,23 @@
 import math
 import random
+import enum
 from typing import Union
 
 import math
 
+# Supported operations 
+class OP(enum.Enum):
+    plus = 0
+    multiply = 1
+    exponential = 2
+    tanh = 3
+
+
+# this class is the actual enigne of the library.
+# the class will keep tracking effect of different math oprations on the main class data `self.data` which is a normal float.   
 class Value:
     def __init__(self, data, children=(), op=''):
-        self.data: float = data                 # # #   
+        self.data: float = data                 # # #
         self.children: tuple = children
         self.op: str = op
         self.grad: float = 0.0
@@ -93,7 +104,7 @@ class Value:
     def backward(self):
         self.grad = 1.0  # Start gradient from output node
         topo = []
-        visited: set[Value] = {}
+        visited: set[Value] = set()
 
         def build_topo(node: Value):
             if node not in visited:
@@ -150,8 +161,8 @@ class Neuron:
 
 
 
-class Layer:                                                                                # Layer of neurons
-    def __init__(self, input_count: int, output_count: int, initlization: float|None=None): #|> MLP of 2, 2 
+class Layer:
+    def __init__(self, input_count: int, output_count: int, initlization: float|None=None): 
         """
         Create a layer of Neurons `Neuron()`
         ### parameters
@@ -177,7 +188,7 @@ class Layer:                                                                    
 
 
 class Network:
-    def __init__(self, layers: list[int], initlization: float|None=None) -> list[Value]:       # [2, 4, 3] -->  2 input, 4 hidden, 3 output
+    def __init__(self, layers: list[int], initlization: float|None=None) -> list[Value]:                 # [2, 4, 3] -->  2 input, 4 hidden, 3 output
         """
         Create a layer of Neurons `Neuron()`
         ### parameters
@@ -202,8 +213,22 @@ class Network:
         layers_str = "\n  ".join(f"Layer {i}: {str(layer)}" for i, layer in enumerate(self.layers))
         return f"Network(\n  {layers_str}\n)"
 
-    def parameters(self):
+
+
+    def parameters(self):                     
         para: list[Value] = []
         for layer in self.layers:
             para.extend(layer.parameters())
-        return para
+    
+        unique_para = []
+        seen = set()  # Track unique object IDs
+        for p in para:
+            if id(p) not in seen:
+                seen.add(id(p))
+                unique_para.append(p)
+    
+        return unique_para
+
+
+if __name__ == '__main__':
+    pass
