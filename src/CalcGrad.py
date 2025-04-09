@@ -158,6 +158,12 @@ class Neuron:
     def parameters(self) -> list[Value]:
         self.weights.append(self.bias)
         return self.weights
+    
+    def set_grad(self, grad: float|Value):
+        for w in self.weights:
+            w.grad = grad if isinstance(grad, Value) else Value(grad)
+        
+        self.bias = grad if isinstance(grad, Value) else Value(grad)
 
 
 
@@ -185,6 +191,10 @@ class Layer:
             para.extend(neuron.parameters())
         return para
 
+    def set_grad(self, grad: float|Value):
+        for n in self.neurons:
+            n.set_grad(grad)
+
 
 
 class Network:
@@ -195,6 +205,9 @@ class Network:
         `layers`: length of layers .e.g `[1, 3, 4, 1]` network of one input layer, tow hidden layers and one output layer.\n
         `initlization`: Will initlize all the neurons with some float value if not None.
         """
+        if sum([1 if i > 0 else 0 for i in layers]) < len(layers):
+            raise RuntimeError("layers cannot be of size zero")
+
         self.layers: list[Layer] = [Layer(layers[i], layers[i+1], initlization) for i in range(len(layers)-1)]
 
 
@@ -236,11 +249,12 @@ class Network:
         if len(y_train) != len(preductions):
             raise ValueError("length of y_train and preductions is NOT equal")
         
-        return sum([y_train + pred for tr, pred in zip(y_train, preductions)])
+        return sum([(pred - tr)**2 for tr, pred in zip(y_train, preductions)])**0.5
         
 
-
-
+    def set_grad(self, grad: float|Value):
+        for l in self.layers:
+            l.set_grad(grad)
 
 
 if __name__ == '__main__':

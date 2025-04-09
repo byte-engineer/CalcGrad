@@ -1,75 +1,66 @@
-# CalcGrad
+# 🧠 Minimal Neural Network Library (Pure Python)
 
-CalcGrad is a lightweight Python library for tracking numerical operations and computing gradients using automatic differentiation. It provides a simple yet powerful framework for backpropagation, making it ideal for machine learning and optimization tasks.
+A tiny neural network framework built from scratch using only Python — no external libraries.
 
-## Features
-- **Automatic Differentiation**: Compute gradients efficiently with backpropagation.
-- **Custom Computational Graph**: Track operations for each computation.
-- **Neural Network Support**: Includes basic implementations of neurons, layers, and multi-layer perceptrons (MLP).
+---
 
-## Installation
-Currently, CalcGrad is not available via `pip`. You can use it by cloning the repository and importing it into your project:
+## ✨ Features
+- Auto-diff with a custom `Value` class
+- Neurons, Layers, and full Networks
+- Forward + Backward pass (manual training)
+- Tanh activation
+- Supports training simple tasks like XOR
 
-```sh
-# Clone the repository
-$ git clone https://github.com/yourusername/calcgrad.git
-$ cd calcgrad
-```
+---
 
-Then, import the library in your Python code:
+## 🚀 Quick Start
 
+### 1. Define a Network
 ```python
-from calcgrad import Value, Neuron, Layer, MLP
+from mynet import Network, Value
+
+net = Network([2, 4, 1])  # 2 inputs → 4 hidden → 1 output
 ```
 
-## Usage
-### Basic Operations
-CalcGrad allows you to create `Value` objects that support arithmetic operations while tracking gradients.
-
+### 1. 2. Training Data (XOR)
 ```python
-from calcgrad import Value
-
-x = Value(3.0)
-y = Value(2.0)
-z = x * y + x ** 2
-z.backward()
-
-print(f"z: {z.data}, dz/dx: {x.grad}, dz/dy: {y.grad}")
+data = [
+    ([0.0, 0.0], [0.0]),
+    ([0.0, 1.0], [1.0]),
+    ([1.0, 0.0], [1.0]),
+    ([1.0, 1.0], [0.0]),
+]
 ```
 
-### Building a Neural Network
-CalcGrad includes simple classes for neurons, layers, and multi-layer perceptrons (MLP).
-
+###3. Training Loop
 ```python
-from calcgrad import MLP
+lr = 0.05
+for epoch in range(1000):
+    total_loss = Value(0.0)
+    for x, y in data:
+        inputs = [Value(i) for i in x]
+        targets = [Value(t) for t in y]
+        outputs = net(inputs)
+        loss = net.calc_loss(targets, outputs)
 
-mlp = MLP(3, [4, 2, 1])  # 3 input neurons, 2 hidden layers (4 and 2 neurons), and 1 output neuron
-x = [Value(0.5), Value(-1.2), Value(0.8)]
-output = mlp(x)
-print(output)
+        for p in net.parameters(): p.zero_grad()
+        loss.backward()
+        for p in net.parameters(): p.data -= lr * p.grad
+
+        total_loss += loss
+
+    if epoch % 100 == 0:
+        print(f"Epoch {epoch} Loss: {total_loss.data:.4f}")
 ```
 
-## API Reference
-### `Value` Class
-- `Value(data)`: Creates a scalar value that supports arithmetic operations.
-- Supports `+`, `-`, `*`, `/`, `**` operations while tracking gradients.
-- `backward()`: Computes the gradients via backpropagation.
+###🔍 Predict
+```python
+for x, _ in data:
+    out = net([Value(i) for i in x])
+    print(f"{x} → {[o.data for o in out]}")
+```
 
-### `Neuron` Class
-- `Neuron(wNumber)`: A single neuron with `wNumber` weights.
-- `__call__(x)`: Performs a forward pass using the tanh activation function.
+### 📄 License
+MIT — Use it, learn from it, hack it! 🔧
 
-### `Layer` Class
-- `Layer(nin, nout)`: A layer of neurons.
-- `__call__(x)`: Passes input through the layer.
-
-### `MLP` Class
-- `MLP(nin, nout)`: A simple multi-layer perceptron (MLP).
-- `__call__(x)`: Performs forward propagation through all layers.
-
-## Contributing
-Contributions are welcome! Feel free to open issues or submit pull requests.
-
-## License
-This project is licensed under the MIT License.
 
