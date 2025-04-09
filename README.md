@@ -60,7 +60,7 @@ for x, _ in data:
     print(f"{x} → {[o.data for o in out]}")
 ```
 
-### License
+### `License
 MIT — Use it, learn from it, hack it! 🔧
 
 
