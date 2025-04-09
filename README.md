@@ -32,7 +32,7 @@ data = [
 ]
 ```
 
-###3. Training Loop
+### 3. Training Loop
 ```python
 lr = 0.05
 for epoch in range(1000):
@@ -53,7 +53,7 @@ for epoch in range(1000):
         print(f"Epoch {epoch} Loss: {total_loss.data:.4f}")
 ```
 
-###🔍 Predict
+### 🔍 Predict
 ```python
 for x, _ in data:
     out = net([Value(i) for i in x])
