@@ -1,10 +1,10 @@
-# 🧠 Minimal Neural Network Library (Pure Python)
+# Neural Network Library
 
 A tiny neural network framework built from scratch using only Python — no external libraries.
 
 ---
 
-## ✨ Features
+## Features
 - Auto-diff with a custom `Value` class
 - Neurons, Layers, and full Networks
 - Forward + Backward pass (manual training)
@@ -13,7 +13,7 @@ A tiny neural network framework built from scratch using only Python — no exte
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Define a Network
 ```python
@@ -53,14 +53,14 @@ for epoch in range(1000):
         print(f"Epoch {epoch} Loss: {total_loss.data:.4f}")
 ```
 
-### 🔍 Predict
+### Predict
 ```python
 for x, _ in data:
     out = net([Value(i) for i in x])
     print(f"{x} → {[o.data for o in out]}")
 ```
 
-### 📄 License
+### License
 MIT — Use it, learn from it, hack it! 🔧
 
 
