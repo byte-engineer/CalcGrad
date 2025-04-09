@@ -22,7 +22,7 @@ from mynet import Network, Value
 net = Network([2, 4, 1])  # 2 inputs → 4 hidden → 1 output
 ```
 
-### 1. 2. Training Data (XOR)
+### 2. Training Data (XOR)
 ```python
 data = [
     ([0.0, 0.0], [0.0]),
